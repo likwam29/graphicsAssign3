@@ -28,9 +28,17 @@ const up = vec3(0.0, 1.0, 0.0);
 // mathematically defined object such as the sombrero surface or
 // Moebius band
 
+var nRows = 25;
+var nColumns = 25;
+
+var datax = [];
+var datay = [];
+var dataz = [];
+
 var numVerticesObj1  = 36;	// For the 12 triangles
 
 var pointsArray1 = [];
+
 
 var vertices1 = [
     vec4(-0.5, -0.5,  1.5, 1.0),
@@ -45,21 +53,30 @@ var vertices1 = [
 
 function coordsForObj1()
 {
-    function quad(a, b, c, d) {
-	pointsArray1.push(vertices1[a]); 
-	pointsArray1.push(vertices1[b]); 
-	pointsArray1.push(vertices1[c]); 
-	pointsArray1.push(vertices1[a]); 
-	pointsArray1.push(vertices1[c]); 
-	pointsArray1.push(vertices1[d]); 
-    };
+    for( var i = 0; i <= nRows; ++i ) {
+		datax.push( [] );
+		datay.push( [] );
+		dataz.push( [] );
+		var u = 2.0 * Math.PI * (i/nRows);
+		console.log(u);
+		
+		for( var j = 0; j <= nColumns; ++j ) {
+			var v = -0.3 + ((j/nColumns) * 0.6);
+			datax[i].push(Math.cos(u) + v * Math.sin(u/2.0) * Math.cos(u));
+			datay[i].push(Math.sin(u) + v * Math.sin(u/2.0) * Math.sin(u));
+			dataz[i].push(v * Math.cos(u/2.0));
+		}
+    }
+    
+    for(var i=0; i<nRows; i++) {
+        for(var j=0; j<nColumns;j++) {
+            pointsArray1.push( vec4(datax[i][j], datay[i][j], dataz[i][j],1.0));
+            pointsArray1.push( vec4(datax[i+1][j], datay[i+1][j], dataz[i+1][j], 1.0));
+            pointsArray1.push( vec4(datax[i+1][j+1], datay[i+1][j+1], dataz[i+1][j+1], 1.0));
+            pointsArray1.push( vec4(datax[i][j+1], datay[i][j+1], dataz[i][j+1], 1.0));
+		}	
 
-    quad( 1, 0, 3, 2 );
-    quad( 2, 3, 7, 6 );
-    quad( 3, 0, 4, 7 );
-    quad( 6, 5, 1, 2 );
-    quad( 4, 5, 6, 7 );
-    quad( 5, 4, 0, 1 );
+    }
 }
 
 ///////// End of vertex information for Object 1  ////////
@@ -76,8 +93,9 @@ window.onload = function init() {
     aspect =  canvas.width/canvas.height;
     gl.clearColor( 0.0, 0.0, 0.0, 1.0 );
     gl.enable(gl.DEPTH_TEST);
-    
-
+    gl.depthFunc(gl.LEQUAL);
+	gl.enable( gl.POLYGON_OFFSET_FILL );
+	gl.polygonOffset(1.0,2.0);
     //
     //  Load shaders and initialize attribute buffers
     //
@@ -128,9 +146,12 @@ var render = function(){
     gl.uniformMatrix4fv( modelViewMatrixLoc, false, flatten(modelViewMatrix) );
     gl.uniformMatrix4fv( projectionMatrixLoc, false, flatten(projectionMatrix) );
     
-    gl.uniform4fv(gl.getUniformLocation(program, "fColor"),
-		  flatten(vec4(1.0, 0.0, 0.0, 1.0)));
-    gl.drawArrays( gl.TRIANGLES, 0, numVerticesObj1 );
+    for(var i=0; i<pointsArray1.length; i+=4) { 
+        gl.uniform4fv(gl.getUniformLocation(program, "fColor"), flatten(vec4(.5, .5, .5, 1.0)));
+        gl.drawArrays( gl.TRIANGLE_FAN, i, 4 );
+        gl.uniform4fv(gl.getUniformLocation(program, "fColor"), flatten(vec4(1.0, 1.0, 1.0, 1.0)));
+        gl.drawArrays( gl.LINE_LOOP, i, 4 );
+    }
 
 
     // The BuckyBall
@@ -143,8 +164,9 @@ var render = function(){
     gl.uniformMatrix4fv( projectionMatrixLoc, false, flatten(projectionMatrix) );
     
     gl.uniform4fv(gl.getUniformLocation(program, "fColor"),
-		  flatten(vec4(0.0, .0, 1.0, 1.0)));
-    gl.drawArrays( gl.TRIANGLES, numVerticesObj1, buckyBall.length );
+		  flatten(vec4(0.0, 0.0, 1.0, 1.0)));
+    gl.drawArrays( gl.TRIANGLES, pointsArray1.length, buckyBall.length );
+	
 
     requestAnimFrame(render);
 };
