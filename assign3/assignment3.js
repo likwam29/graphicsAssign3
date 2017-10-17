@@ -179,10 +179,10 @@ var render = function(){
     gl.uniformMatrix4fv( modelViewMatrixLoc, false, flatten(modelViewMatrix) );
     gl.uniformMatrix4fv( projectionMatrixLoc, false, flatten(projectionMatrix) );
 	gl.uniform4fv(gl.getUniformLocation(program, "fColor"),
-	  flatten(vec4(0.0, 0.0, 1.0, 1.0)));
+	  flatten(vec4(0.0, Math.cos(transX), 1.0, 1.0)));
 	gl.drawArrays( gl.TRIANGLES, pointsArray1.length, 240 );
 	gl.uniform4fv(gl.getUniformLocation(program, "fColor"),
-	  flatten(vec4(0.0, Math.cos(transX), 1.0, 1.0)));
+	  flatten(vec4(Math.cos(transX), 1.0, Math.cos(transX), 1.0)));
 	gl.drawArrays( gl.TRIANGLES, pointsArray1.length + 240, 109 );
 	for(var i=0; i<119; i+=6) { 
 		gl.uniform4fv(gl.getUniformLocation(program, "fColor"),
