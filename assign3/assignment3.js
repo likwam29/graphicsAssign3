@@ -1,4 +1,11 @@
-// assignment3.js -- A starting point for your work on Assignment 3
+// Matthew Likwarz and Sean Mitchell
+// Assignment 3
+// Golly-Gee_Whiz: Made the mobius band rotate and change color. Made the bucky ball and orbiting buckyball change color. Made an
+//                 orbiting buckyball. Added a firefox browser check so it would look nice in both chrome and firefox.
+//                 
+
+
+var isFirefox = typeof InstallTrigger !== 'undefined';
 
 var canvas;
 var gl;
@@ -42,7 +49,8 @@ var tempArr = [];
 
 var transX = 1;
 var transY = 1;
-var rotateX = 0.0;
+var rotate = 0.0;
+var orbit = 0;
 
 
 var vertices1 = [
@@ -151,10 +159,10 @@ var render = function(){
     eye = vec3(radius*Math.sin(theta)*Math.cos(phi), 
                radius*Math.sin(theta)*Math.sin(phi), radius*Math.cos(theta));
 
-    // Object 1
+    // Mobius strip
     modelViewMatrix = lookAt(eye, at , up);
     modelViewMatrix = mult(modelViewMatrix, translate(-1.2,0.0,0.0));
-	modelViewMatrix = mult(modelViewMatrix, rotateY(rotateX, 0.0,0.0));
+	modelViewMatrix = mult(modelViewMatrix, rotateY(rotate, 0.0,0.0));
     modelViewMatrix = mult(modelViewMatrix, scalem(1.0,1.0,1.0));
     projectionMatrix = perspective(fovy, aspect, near, far);
 
@@ -172,8 +180,8 @@ var render = function(){
     modelViewMatrix = lookAt(eye, at , up);
 	
     modelViewMatrix = mult(modelViewMatrix, translate(1.75 * transX, Math.cos(transY) / 3,0.0));
-	modelViewMatrix = mult(modelViewMatrix, rotateZ(rotateX, 0.0,0.0));
-    modelViewMatrix = mult(modelViewMatrix, scalem(0.03,0.03,0.03));
+	modelViewMatrix = mult(modelViewMatrix, rotateZ(rotate, 0.0,0.0));
+    modelViewMatrix = mult(modelViewMatrix, scalem(0.025,0.025,0.025));
     projectionMatrix = perspective(fovy, aspect, near, far);
 
     gl.uniformMatrix4fv( modelViewMatrixLoc, false, flatten(modelViewMatrix) );
@@ -189,9 +197,63 @@ var render = function(){
 		  flatten(vec4(0.0, 0.0, 0.0, 1.0)));
 		gl.drawArrays( gl.LINE_LOOP, pointsArray1.length + buckyBall.length + i, 6 );
     }
-	rotateX -= 2;
-    transX -= .17;
-	transY += .85;
+	
+	// Orbiting ball horizontal
+	modelViewMatrix = lookAt(eye, at , up);
+	modelViewMatrix = mult(modelViewMatrix, translate(1.75 * transX, Math.cos(transY) / 3,0.0));
+	modelViewMatrix = mult(modelViewMatrix, rotateY(20.0 + orbit, 0.0,0.0));
+    modelViewMatrix = mult(modelViewMatrix, translate(1.0, 0.0 / 3,0.0));
+    modelViewMatrix = mult(modelViewMatrix, scalem(0.0075,0.0075,0.0075));
+    projectionMatrix = perspective(fovy, aspect, near, far);
+
+    gl.uniformMatrix4fv( modelViewMatrixLoc, false, flatten(modelViewMatrix) );
+    gl.uniformMatrix4fv( projectionMatrixLoc, false, flatten(projectionMatrix) );
+	gl.uniform4fv(gl.getUniformLocation(program, "fColor"),
+	  flatten(vec4(Math.cos(transX), Math.cos(transX), 0.0, 1.0)));
+	gl.drawArrays( gl.TRIANGLES, pointsArray1.length, 240 );
+	gl.uniform4fv(gl.getUniformLocation(program, "fColor"),
+	  flatten(vec4(Math.cos(transX), 0.0, 0.0, 1.0)));
+	gl.drawArrays( gl.TRIANGLES, pointsArray1.length + 240, 109 );
+	for(var i=0; i<119; i+=6) { 
+		gl.uniform4fv(gl.getUniformLocation(program, "fColor"),
+		  flatten(vec4(0.0, 0.0, 0.0, 1.0)));
+		gl.drawArrays( gl.LINE_LOOP, pointsArray1.length + buckyBall.length + i, 6 );
+    }
+	
+	// Orbiting ball vertical
+	modelViewMatrix = lookAt(eye, at , up);
+	modelViewMatrix = mult(modelViewMatrix, translate(1.75 * transX, Math.cos(transY) / 3,0.0));
+	modelViewMatrix = mult(modelViewMatrix, rotateX(20.0 + orbit, 0.0,0.0));
+    modelViewMatrix = mult(modelViewMatrix, translate(0.0, 1.0,0.0));
+    modelViewMatrix = mult(modelViewMatrix, scalem(0.0075,0.0075,0.0075));
+    projectionMatrix = perspective(fovy, aspect, near, far);
+
+    gl.uniformMatrix4fv( modelViewMatrixLoc, false, flatten(modelViewMatrix) );
+    gl.uniformMatrix4fv( projectionMatrixLoc, false, flatten(projectionMatrix) );
+	gl.uniform4fv(gl.getUniformLocation(program, "fColor"),
+	  flatten(vec4(Math.cos(transX), 0.0, 0.0, 1.0)));
+	gl.drawArrays( gl.TRIANGLES, pointsArray1.length, 240 );
+	gl.uniform4fv(gl.getUniformLocation(program, "fColor"),
+	  flatten(vec4(Math.cos(transY), 0.0, 0.0, 1.0)));
+	gl.drawArrays( gl.TRIANGLES, pointsArray1.length + 240, 109 );
+	for(var i=0; i<119; i+=6) { 
+		gl.uniform4fv(gl.getUniformLocation(program, "fColor"),
+		  flatten(vec4(0.0, 0.0, 0.0, 1.0)));
+		gl.drawArrays( gl.LINE_LOOP, pointsArray1.length + buckyBall.length + i, 6 );
+    }
+	
+	if(isFirefox){
+		rotate -= 2;
+		transX -= .017;
+		transY += .085;
+		orbit += 5;
+	}else{
+		rotate -= 2;
+		transX -= .17;
+		transY += .85;
+		orbit += 35;
+	}
+	
 	if(1.75 * transX < -3.7){
 		transX = 2;
 		transY = 1;
