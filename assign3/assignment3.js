@@ -1,7 +1,7 @@
 // Matthew Likwarz and Sean Mitchell
 // Assignment 3
-// Golly-Gee_Whiz: Made the mobius band rotate and change color. Made the bucky ball and orbiting buckyball change color. Made an
-//                 orbiting buckyball. Added a firefox browser check so it would look nice in both chrome and firefox.
+// Golly-Gee_Whiz: Made the mobius band rotate and change color. Made the bucky ball and orbiting buckyball change color. Made two
+//                 orbiting buckyballs. Added a firefox browser check so it would look nice in both chrome and firefox.
 //                 
 
 
